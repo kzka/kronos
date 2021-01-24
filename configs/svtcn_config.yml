@@ -1,0 +1,30 @@
+TRAINING_ALGO: svtcn
+BATCH_SIZE: 2
+SAMPLING:
+  STRATEGY: window
+  NUM_CONTEXT_FRAMES: 1
+  NUM_FRAMES_PER_SEQUENCE: 40
+LOSS:
+  L2_NORMALIZE_EMBEDDINGS: false
+  POS_RADIUS: 5
+  NEG_RADIUS: 10
+  MARGIN: 0.2
+IMAGE_SIZE:
+- 224
+- 224
+AUGMENTATION:
+  EVAL:
+  - global_resize
+  - normalize
+  TRAIN:
+  - global_resize
+  - horizontal_flip
+  - normalize
+MODEL:
+  FEATURIZER:
+    NETWORK_TYPE: resnet18
+    TRAIN_BASE: all
+  EMBEDDER:
+    WIDEN_FACTOR: 1
+    EMBEDDING_SIZE: 128
+    FLATTEN_METHOD: max_pool

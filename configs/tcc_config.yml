@@ -1,0 +1,33 @@
+TRAINING_ALGO: stcc
+DATASET: embodied_flip_book
+BATCH_SIZE: 4
+TRAIN_MAX_ITERS: 1501
+SAMPLING:
+  STRATEGY: phase
+  CONTEXT_STRIDE: 3
+  NUM_CONTEXT_FRAMES: 2
+  NUM_FRAMES_PER_SEQUENCE: 24
+  PRETRAIN_BATCH_SAMPLER: random
+MODEL:
+  EMBEDDER:
+    NUM_CONV_LAYERS: 2
+    NUM_FC_LAYERS: 2
+    EMBEDDING_SIZE: 128
+    FLATTEN_METHOD: max_pool
+    WIDEN_FACTOR: 2
+  FEATURIZER:
+    NETWORK_TYPE: resnet18
+    TRAIN_BASE: all
+LOSS:
+  LOSS_TYPE: regression_mse_var
+  WEIGHT_TCC: 0.9
+  MARGIN_HINGE: 0.3
+AUGMENTATION:
+  EVAL:
+  - global_resize
+  - normalize
+  TRAIN:
+  - global_resize
+  - horizontal_flip
+  - color_jitter
+  - normalize
