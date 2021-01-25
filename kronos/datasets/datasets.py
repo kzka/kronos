@@ -16,8 +16,7 @@ from ipdb import set_trace
 
 
 class VideoDataset(Dataset):
-    """A dataset for working with videos.
-    """
+    """A dataset for working with videos."""
 
     def __init__(
         self,
@@ -202,11 +201,11 @@ class VideoDataset(Dataset):
             phase_indices = self._get_phase_label(vid_paths)
         sample = self._frame_sampler.sample(vid_paths, phase_indices)
 
-        # Load debris state.
-        filename = osp.join(vid_paths[0], "debris.json")
-        debris_nums = file_utils.load_json(filename)
-        debris_nums = np.array([debris_nums[0]] + debris_nums)
-        debris_nums = debris_nums[sample["frame_idxs"]]
+        # # Load debris state.
+        # filename = osp.join(vid_paths[0], "debris.json")
+        # debris_nums = file_utils.load_json(filename)
+        # debris_nums = np.array([debris_nums[0]] + debris_nums)
+        # debris_nums = debris_nums[sample["frame_idxs"]]
 
         # load each frame along with its context
         # frames into an array of shape
@@ -225,7 +224,7 @@ class VideoDataset(Dataset):
             "frame_idxs": np.asarray(sample["frame_idxs"], dtype=np.int64),
             "video_name": vid_paths,
             "video_len": sample["vid_len"],
-            "debris_nums": debris_nums,
+            # "debris_nums": debris_nums,
         }
 
         if sample["frame_labels"] is not None:
@@ -278,7 +277,7 @@ class VideoDataset(Dataset):
             "frame_idxs": torch.stack([b["frame_idxs"] for b in batch]),
             "video_len": torch.stack([b["video_len"] for b in batch]),
             "video_name": [b["video_name"] for b in batch],
-            "debris_nums": torch.stack([b["debris_nums"] for b in batch]),
+            # "debris_nums": torch.stack([b["debris_nums"] for b in batch]),
         }
         if self._labeled is not None:
             if "phase_labels" in batch[0]:

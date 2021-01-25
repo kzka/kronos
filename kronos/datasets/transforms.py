@@ -146,8 +146,8 @@ class Augmentor:
         str(TransformationType.GLOBAL_RESIZE): partial(alb.Resize, p=1.0),
         str(TransformationType.COLOR_JITTER): partial(
             ColorJitter,
-            brightness=0.3,
-            contrast=0.3,
+            brightness=0.1,
+            contrast=0.1,
             hue=0.08,
             saturation=0.08,
             p=0.8,

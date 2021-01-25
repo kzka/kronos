@@ -1,5 +1,4 @@
-"""Random debugging.
-"""
+"""Debugging script."""
 
 import argparse
 import matplotlib
@@ -10,7 +9,7 @@ import os.path as osp
 import sys
 import torchvision
 
-from ipdb import set_trace
+from pdb import set_trace
 
 from kronos.config import CONFIG
 from kronos.datasets.transforms import UnNormalize
@@ -29,7 +28,7 @@ def main(args):
     debug = {
         "sample_sequential": not args.shuffle,
         "augment": args.augment,
-        "labeled": None,
+        "num_workers": 0,
     }
     model, optimizer, loaders, trainer, _ = experiment_utils.get_factories(
         config, device, debug=debug
@@ -39,20 +38,13 @@ def main(args):
     num_frames = config.SAMPLING.NUM_FRAMES_PER_SEQUENCE
     try:
         loader = loaders["pretrain_train"]
-        # set_trace()
         for batch_idx, batch in enumerate(loader):
             if batch_idx > 4:
                 break
             frames = batch["frames"]
-            target = batch["debris_nums"].to(device)
-            # labels = batch["success"]
-            # names = batch["video_name"]
             b, _, c, h, w = frames.shape
             frames = frames.view(b, num_frames, num_ctx_frames, c, h, w)
             for b in range(frames.shape[0]):
-                print(target[b])
-                # print(labels[b])
-                # print(names[b])
                 if args.viz_context:
                     fig, axes = plt.subplots(
                         num_ctx_frames, num_frames, constrained_layout=True

@@ -43,6 +43,9 @@ if __name__ == "__main__":
         output_dir = args.input_dir
         operator = file_utils.move_folder
 
+    base_train_dir = osp.join(output_dir, "train")
+    base_valid_dir = osp.join(output_dir, "valid")
+
     for input_subdir in input_subdirs:
         video_dirs = file_utils.get_subdirs(input_subdir)
 
@@ -53,8 +56,8 @@ if __name__ == "__main__":
         valid_files = video_dirs[num_train:]
 
         # Create directories.
-        train_dir = osp.join(output_dir, osp.basename(input_subdir), "train")
-        valid_dir = osp.join(output_dir, osp.basename(input_subdir), "valid")
+        train_dir = osp.join(base_train_dir, osp.basename(input_subdir))
+        valid_dir = osp.join(base_valid_dir, osp.basename(input_subdir))
         file_utils.mkdir(train_dir)
         file_utils.mkdir(valid_dir)
 
@@ -65,3 +68,5 @@ if __name__ == "__main__":
         for f in valid_files:
             dst = osp.join(valid_dir, osp.basename(f))
             operator(f, dst)
+
+        # file_utils.rm(input_subdir)

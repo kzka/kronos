@@ -152,70 +152,54 @@ def get_dataloaders(config, debug):
     sample_sequential = False
     augment = True
 
-    # # we only need labeled data loaders if we are using
-    # # an evaluator that requires it.
-    # # currently, only phase_alignment requires labels.
-    # if "phase_alignment" in config.EVAL.DOWNSTREAM_TASK_EVALUATORS:
-    #     labeled = True
-    # else:
-    #     labeled = False
+    # We only need labeled data loaders if we are using an evaluator that
+    # requires it. Currently, only phase_alignment requires labels.
+    # TODO(kevin): Deal with this later.
+    labeled = None
 
     # parse debug params
     if debug is not None:
         debug_default_params = {
-            "sample_sequential": False,
-            "augment": True,
-            "num_workers": 4,
-            "labeled": None,
+            "sample_sequential": True,
+            "augment": False,
+            "num_workers": 0,
         }
         debug_default_params.update(debug)
         sample_sequential = debug_default_params["sample_sequential"]
         num_workers = debug_default_params["num_workers"]
         augment = debug_default_params["augment"]
-        labeled = debug_default_params["labeled"]
         logging.info(f"Using {num_workers} workers.")
 
-    # num_workers = 0
-    # sample_sequential = False
-    # batch_labeled = True if labeled == "both" else False
-    labeled = None
-    batch_labeled = False
+    batch_labeled = True if labeled == "both" else False
 
     # pretraining train dataset
     train_dataset = factories.PreTrainingDatasetFactory.from_config(
-        config, "train", not augment, labeled,
-    )
+        config, "train", not augment, labeled)
     batch_sampler = factories.BatchSamplerFactory.from_config(
-        config, train_dataset, False, sample_sequential, batch_labeled
-    )
+        config, train_dataset, False, sample_sequential, batch_labeled)
     dloaders["pretrain_train"] = torch.utils.data.DataLoader(
         train_dataset,
         collate_fn=train_dataset.collate_fn,
         batch_sampler=batch_sampler,
         num_workers=num_workers,
-        pin_memory=pinned_memory,
-    )
+        pin_memory=pinned_memory)
 
     # pretraining valid dataset
     valid_dataset = factories.PreTrainingDatasetFactory.from_config(
-        config, "valid", not augment, labeled,
-    )
+        config, "valid", not augment, labeled)
     batch_sampler = factories.BatchSamplerFactory.from_config(
-        config, valid_dataset, False, sample_sequential, batch_labeled
-    )
+        config, valid_dataset, False, sample_sequential, batch_labeled)
     dloaders["pretrain_valid"] = torch.utils.data.DataLoader(
         valid_dataset,
         collate_fn=valid_dataset.collate_fn,
         batch_sampler=batch_sampler,
         num_workers=num_workers,
-        pin_memory=pinned_memory,
-    )
+        pin_memory=pinned_memory)
 
     # downstream train dataset
     dloaders["downstream_train"] = {}
     train_downstream_datasets = factories.DownstreamDatasetFactory.from_config(
-        config, "train", not augment, labeled=labeled
-    )
+        config, "train", not augment, labeled=labeled)
     for (
         action_class,
         train_downstream_dataset,
@@ -223,10 +207,9 @@ def get_dataloaders(config, debug):
         batch_sampler = factories.BatchSamplerFactory.from_config(
             config,
             train_downstream_dataset,
-            True,
+            True,  # Turns off data augmentation.
             sample_sequential,
-            batch_labeled,
-        )
+            batch_labeled)
         dloaders["downstream_train"][
             action_class
         ] = torch.utils.data.DataLoader(
@@ -234,14 +217,12 @@ def get_dataloaders(config, debug):
             collate_fn=train_downstream_dataset.collate_fn,
             batch_sampler=batch_sampler,
             num_workers=num_workers,
-            pin_memory=pinned_memory,
-        )
+            pin_memory=pinned_memory)
 
     # downstream valid dataset
     dloaders["downstream_valid"] = {}
     valid_downstream_datasets = factories.DownstreamDatasetFactory.from_config(
-        config, "valid", not augment, labeled=labeled
-    )
+        config, "valid", not augment, labeled=labeled)
     for (
         action_class,
         valid_downstream_dataset,
@@ -249,10 +230,9 @@ def get_dataloaders(config, debug):
         batch_sampler = factories.BatchSamplerFactory.from_config(
             config,
             valid_downstream_dataset,
-            True,
+            True,  # Turns off data augmentation.
             sample_sequential,
-            batch_labeled,
-        )
+            batch_labeled)
         dloaders["downstream_valid"][
             action_class
         ] = torch.utils.data.DataLoader(
@@ -260,8 +240,7 @@ def get_dataloaders(config, debug):
             collate_fn=valid_downstream_dataset.collate_fn,
             batch_sampler=batch_sampler,
             num_workers=num_workers,
-            pin_memory=pinned_memory,
-        )
+            pin_memory=pinned_memory)
 
     return dloaders
 
@@ -272,7 +251,7 @@ class Net(nn.Module):
 
         self.model = models.resnet18(pretrained=False)
         num_ftrs = self.model.fc.in_features
-        self.model.fc = nn.Linear(num_ftrs, 128)
+        self.model.fc = nn.Linear(num_ftrs, 32)
 
     def forward(self, x):
         batch_size, t, c, h, w = x.shape

@@ -87,6 +87,7 @@ class DatasetFactory(Factory):
         "embodied_cup_in_plate": CONFIG.DIRS.EMBODIED_CUP_IN_PLATE_DIR,
         "embodied_pens_in_cup": CONFIG.DIRS.EMBODIED_PENS_IN_CUP_DIR,
         "demo": CONFIG.DIRS.DEMO_DIR,
+        "magical": CONFIG.DIRS.MAGICAL_DIR,
     }
 
     PRODUCTS = {
@@ -124,7 +125,6 @@ class DatasetFactory(Factory):
             action_classes = file_utils.get_subdirs(
                 dataset_path, basename=True, nonempty=True
             )
-        # action_classes = ['magnet', 'box']
 
         # figure out image size
         image_size = config.IMAGE_SIZE
@@ -133,10 +133,15 @@ class DatasetFactory(Factory):
         image_size = tuple(image_size)
 
         if debug:
-            # the minimum obligatory data augmentation
-            # we want to keep is resize and mean-var
-            # normalization
-            augment = ["global_resize", "normalize"]
+            # The minimum obligatory data augmentation we want to keep is resize
+            # and mean-var normalization.
+            # augment = ["global_resize", "normalize"]
+            augment = ["global_resize"]
+
+        # print('Action classes: \n')
+        # for action_class in action_classes:
+        #     print(f'\t{action_class}')
+        # print('\n')
 
         if downstream:
             dataset = {}
@@ -174,8 +179,7 @@ class DatasetFactory(Factory):
 
 
 class PreTrainingDatasetFactory(DatasetFactory):
-    """Factory to create pre-training datasets.
-    """
+    """Factory to create pre-training datasets."""
 
     PRODUCTS = DatasetFactory.PRODUCTS
 
@@ -255,7 +259,7 @@ class EvaluatorFactory(Factory):
         "phase_alignment_topk": evaluators.PhaseAlignmentTopK,
         "cycle_consistency": evaluators.CycleConsistency,
         "nn_visualizer": evaluators.NearestNeighbourVisualizer,
-        "linear_probe": evaluators.LinearProbe,
+        # "linear_probe": evaluators.LinearProbe,
     }
 
     @classmethod

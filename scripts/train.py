@@ -1,4 +1,11 @@
 """Training script.
+
+1. Training on a combination of agents.
+=======================================
+$ agent=gripper
+$ python scripts/train.py \
+    --experiment_name comb_$agent \
+    --config_path configs/magical_config/$agent.yml
 """
 
 import numpy as np
@@ -16,47 +23,33 @@ from kronos.utils.logger import Logger
 
 def main(args):
     log_dir = osp.join(CONFIG.DIRS.LOG_DIR, args.experiment_name)
+    checkpoint_dir = osp.join(log_dir, 'checkpoints')
 
-    if args.action_class is None:
-        action_class = []
-    else:
-        action_class = args.action_class
-
-    # initialize experiment
-    action_class = []
-    opts = [
-        "ACTION_CLASS",
-        action_class,
-    ]
-
-    # initialize experiment
+    # Initialize experiment
+    opts = []
     config, device = experiment_utils.init_experiment(
-        log_dir, CONFIG, args.config_path, opts,
-    )
+        log_dir, CONFIG, args.config_path, opts)
 
-    # setup logger
+    # Setup logger.
     logger = Logger(log_dir, args.resume)
 
-    # load model, data loaders and trainer
+    # Load factories.
     (
         model,
         optimizer,
         loaders,
         trainer,
         evaluators,
-    ) = experiment_utils.get_factories(config, device, debug={"labeled": None})
+    ) = experiment_utils.get_factories(config, device)
 
-    # create lr scheduler
-    scheduler = ReduceLROnPlateau(
-        optimizer, factor=0.5, patience=10, verbose=True
-    )
+    # # Create lr scheduler.
+    # scheduler = ReduceLROnPlateau(
+    #     optimizer, factor=0.5, patience=10, verbose=True)
 
-    # create checkpoint manager
+    # Create checkpoint manager.
     checkpoint_manager = checkpoint.CheckpointManager(
         checkpoint.Checkpoint(model, optimizer),
-        osp.join(config.DIRS.CKPT_DIR, args.experiment_name),
-        device,
-    )
+        checkpoint_dir, device)
 
     global_step = checkpoint_manager.restore_or_initialize()
     epoch = int(global_step / len(loaders["pretrain_train"]))
@@ -68,10 +61,10 @@ def main(args):
         while not complete:
             logger.log_learning_rate(optimizer, global_step)
             for batch_idx, batch in enumerate(loaders["pretrain_train"]):
-                # train one iteration
+                # Train one iteration.
                 loss = trainer.train_one_iter(batch, global_step)
 
-                # save model checkpoint
+                # Save model checkpoint.
                 if not global_step % config.CHECKPOINT.SAVE_INTERVAL:
                     checkpoint_manager.save(global_step)
 
@@ -113,9 +106,9 @@ def main(args):
                         }
                         logger.log_metric(metrics, global_step, eval_name)
 
-                # exit if complete
+                # Exit if complete.
                 global_step += 1
-                if global_step >= config.TRAIN_MAX_ITERS:
+                if global_step > config.TRAIN_MAX_ITERS:
                     complete = True
                     break
 
@@ -132,19 +125,17 @@ def main(args):
                 stopwatch.reset()
             epoch += 1
 
-            # at end of epoch, evaluate validation loss on
-            # 20% of the validation data then step the
-            # scheduler.
-            v_loss = trainer.eval_num_iters(
-                loaders["pretrain_valid"],
-                int(1.0 * num_valid / config.BATCH_SIZE),
-            )
-            scheduler.step(v_loss)
+            # At end of epoch, evaluate validation loss on 20% of the validation
+            # data then step the scheduler.
+            # v_loss = trainer.eval_num_iters(
+            #     loaders["pretrain_valid"],
+            #     int(1.0 * num_valid / config.BATCH_SIZE),
+            # )
+            # scheduler.step(v_loss)
 
     except KeyboardInterrupt:
         logging.info(
-            "Caught keyboard interrupt. Saving model before quitting."
-        )
+            "Caught keyboard interrupt. Saving model before quitting.")
 
     finally:
         checkpoint_manager.save(global_step)
@@ -156,9 +147,6 @@ if __name__ == "__main__":
     parser.add_argument("--experiment_name", type=str, required=True)
     parser.add_argument(
         "--resume", type=lambda s: s.lower() in ["true", "1"], default=False
-    )
-    parser.add_argument(
-        "--action_class", nargs="+", default=None,
     )
     parser.add_argument("--config_path", type=str, default=None)
     args = parser.parse_args()

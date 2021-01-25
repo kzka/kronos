@@ -6,7 +6,6 @@ import random
 import numpy as np
 
 from kronos.utils.file_utils import get_files
-from ipdb import set_trace
 
 
 class FrameSampler(abc.ABC):
