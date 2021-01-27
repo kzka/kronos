@@ -41,10 +41,12 @@ def main(args):
         for batch_idx, batch in enumerate(loader):
             if batch_idx > 4:
                 break
+            print(f"Batch #{batch_idx}")
             frames = batch["frames"]
             b, _, c, h, w = frames.shape
             frames = frames.view(b, num_frames, num_ctx_frames, c, h, w)
             for b in range(frames.shape[0]):
+                print(f"\tBatch Item {b}")
                 if args.viz_context:
                     fig, axes = plt.subplots(
                         num_ctx_frames, num_frames, constrained_layout=True

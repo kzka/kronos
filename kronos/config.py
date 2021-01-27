@@ -36,9 +36,8 @@ _C.TRAINING_ALGO = "tcc"
 _C.BATCH_SIZE = 4
 _C.TRAIN_MAX_ITERS = 20_000
 
-# "magical"
-# "/home/kevin/Desktop/all_but_gripper"
-_C.DATASET = "/home/kevin/Desktop/pngdir"
+# "pngdir"
+_C.DATASET = "/home/kevin/Desktop/all_but_gripper"
 
 # which action classes to select for creating
 # the dataset.
@@ -50,7 +49,7 @@ _C.ACTION_CLASS = []
 # ============================================== #
 _C.SAMPLING = CN()
 
-_C.SAMPLING.PRETRAIN_BATCH_SAMPLER = "random"  # "same_action"
+_C.SAMPLING.PRETRAIN_BATCH_SAMPLER = "stratified"  # "same_action"
 _C.SAMPLING.DOWNSTREAM_BATCH_SAMPLER = "same_action_downstream"
 
 # the widlcard pattern for the video frames

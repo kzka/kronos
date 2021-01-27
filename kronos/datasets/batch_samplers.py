@@ -1,13 +1,12 @@
 import abc
 import logging
+import numpy as np
 import os.path as osp
-
 import torch
 
 from torch.utils.data import Sampler
 
 from kronos.utils import file_utils
-from ipdb import set_trace
 
 
 class VideoBatchSampler(Sampler):
@@ -27,9 +26,8 @@ class VideoBatchSampler(Sampler):
         pass
 
 
-class RandomBatchSampler(VideoBatchSampler):
-    """Randomly samples videos from different action classes into the same batch.
-    """
+class StratifiedBatchSampler(VideoBatchSampler):
+    """Ensures we have a representative of every class in a batch."""
 
     def __init__(self, dir_tree, batch_size, sequential=False, labeled=False):
         """Constructor.
@@ -50,22 +48,81 @@ class RandomBatchSampler(VideoBatchSampler):
         self._dir_tree = dir_tree
 
     def _gen_idxs(self):
-        """Generate the video indices.
-        """
-        # loop over every action class folder
+        """Generate the video indices."""
+        # Loop over every class folder.
         all_idxs = []
         for k, v in enumerate(self._dir_tree.values()):
             len_v = len(v)
-            # generate a list of indices for every video
-            # in the action class
+            # Generate a list of indices for every video in the class.
             seq = list(range(len_v))
             idxs = [(k, s) for s in seq]
             all_idxs.extend(idxs)
-        # shuffle the indices
+
+        class_indices = [t[0] for t in all_idxs]
+        classes = np.unique(class_indices)
+        n_classes = classes.shape[0]
+        class_counts = np.bincount(class_indices)
+        class_indices = np.split(
+            np.arange(len(class_indices)),
+            np.cumsum(class_counts)[:-1])
+        class_indices = [c.tolist() for c in class_indices]
+
+        self.idxs = []
+        end = self.batch_size * (len(all_idxs) // self.batch_size)
+        for i in range(0, end, self.batch_size):
+            batch = []
+            class_perm = np.random.permutation(classes)[:self.batch_size]
+            for class_idx in class_perm:
+                class_idxs = np.random.permutation(class_indices[class_idx])
+                batch.append(all_idxs[class_idxs[0]])
+            self.idxs.append(batch)
+
+    def __iter__(self):
+        self._gen_idxs()
+        return iter(self.idxs)
+
+    def __len__(self):
+        num_vids = 0
+        for vids in self._dir_tree.values():
+            num_vids += len(vids)
+        return num_vids // self.batch_size
+
+
+class RandomBatchSampler(VideoBatchSampler):
+    """Randomly samples videos from different classes into the same batch."""
+
+    def __init__(self, dir_tree, batch_size, sequential=False, labeled=False):
+        """Constructor.
+
+        Args:
+            dir_tree (dict): The directory tree of a `VideoDataset`.
+            batch_size (int): The number of videos in a batch.
+        """
+        self._dir_tree = dir_tree
+        self.batch_size = int(batch_size)
+
+    def update_tree(self, dir_tree):
+        """Update the directory tree.
+
+        This should be used when a `VideoDataset`'s `restrict_subdirs` method
+        is called to update the new directory tree.
+        """
+        self._dir_tree = dir_tree
+
+    def _gen_idxs(self):
+        """Generate the video indices."""
+        # Loop over every class folder.
+        all_idxs = []
+        for k, v in enumerate(self._dir_tree.values()):
+            len_v = len(v)
+            # Generate a list of indices for every video in the class.
+            seq = list(range(len_v))
+            idxs = [(k, s) for s in seq]
+            all_idxs.extend(idxs)
+        # Shuffle the indices.
         all_idxs = [all_idxs[i] for i in torch.randperm(len(all_idxs))]
-        # split the list of indices into chunks of len
-        # `batch_size`, ensuring we drop the last chunk
-        # if it is not of adequate length
+        # Split the list of indices into chunks of len `batch_size`, ensuring
+        # we drop the last chunk if it is not of adequate length.
         self.idxs = []
         end = self.batch_size * (len(all_idxs) // self.batch_size)
         for i in range(0, end, self.batch_size):
@@ -84,8 +141,7 @@ class RandomBatchSampler(VideoBatchSampler):
 
 
 class SameClassBatchSampler(VideoBatchSampler):
-    """Ensures all videos in a batch belong to the same action class.
-    """
+    """Ensures all videos in a batch belong to the same class."""
 
     def __init__(self, dir_tree, batch_size, sequential=False, labeled=False):
         """Constructor.
@@ -118,17 +174,14 @@ class SameClassBatchSampler(VideoBatchSampler):
         self._dir_tree = dir_tree
 
     def _gen_idxs(self):
-        """Generate the video indices.
-        """
-        # loop over every action class folder
+        """Generate the video indices."""
+        # Loop over every action class folder.
         self.idxs = []
         for k, v in enumerate(self._dir_tree.values()):
             len_v = len(v)
             if self._labeled:
-                # we need to figure out which videos
-                # in the action class are positive
-                # labeled, and which are negative
-                # labeled
+                # We need to figure out which videos in the action class are
+                # positive labeled, and which are negative labeled.
                 pos_idxs, neg_idxs = [], []
                 for i, vid in enumerate(v):
                     label_filename = osp.join(vid, "label.json")
@@ -140,13 +193,11 @@ class SameClassBatchSampler(VideoBatchSampler):
 
                 if not self._sequential:
                     pos_idxs = [
-                        pos_idxs[i] for i in torch.randperm(len(pos_idxs))
-                    ]
+                        pos_idxs[i] for i in torch.randperm(len(pos_idxs))]
                     neg_idxs = [
-                        neg_idxs[i] for i in torch.randperm(len(neg_idxs))
-                    ]
+                        neg_idxs[i] for i in torch.randperm(len(neg_idxs))]
 
-                # interleave positive and negative indices
+                # Interleave positive and negative indices.
                 seq = []
                 for i in range(min(len(pos_idxs), len(neg_idxs))):
                     seq.extend([pos_idxs[i], neg_idxs[i]])
@@ -157,27 +208,23 @@ class SameClassBatchSampler(VideoBatchSampler):
                 else:
                     pass
             else:
-                # generate a list of indices for every video
-                # in the action class
+                # Fenerate a list of indices for every video in the class.
                 seq = list(range(len_v))
                 if not self._sequential:
                     seq = [seq[i] for i in torch.randperm(len(seq))]
-            # split the list of indices into chunks of len
-            # `batch_size`, ensuring we drop the last chunk
-            # if it is not of adequate length
+            # Split the list of indices into chunks of len `batch_size`,
+            # ensuring we drop the last chunk if it is not of adequate length.
             idxs = []
             end = self.batch_size * (len_v // self.batch_size)
             for i in range(0, end, self.batch_size):
                 xs = seq[i : i + self.batch_size]
-                # add the action class index to the
-                # video index
+                # Add the class index to the video index.
                 xs = [(k, x) for x in xs]
                 idxs.append(xs)
             self.idxs.extend(idxs)
 
     def __iter__(self):
         self._gen_idxs()
-        # print(self.idxs)
         if not self._sequential:
             return (self.idxs[i] for i in torch.randperm(len(self.idxs)))
         return iter(self.idxs)
@@ -215,5 +262,4 @@ class SameClassMultiViewBatchSampler(VideoBatchSampler):
     """A same-class batch sampler that samples multiple videos
     of the same content but filmed from different views.
     """
-
     pass

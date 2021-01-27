@@ -187,13 +187,13 @@ class DownstreamDatasetFactory(DatasetFactory):
 
 
 class BatchSamplerFactory(Factory):
-    """Factory to create different batch samplers.
-    """
+    """Factory to create different batch samplers."""
 
     PRODUCTS = {
         "same_action": batch_samplers.SameClassBatchSampler,
         "same_action_downstream": batch_samplers.SameClassBatchSamplerDownstream,
         "random": batch_samplers.RandomBatchSampler,
+        "stratified": batch_samplers.StratifiedBatchSampler,
     }
 
     @classmethod
@@ -215,8 +215,7 @@ class BatchSamplerFactory(Factory):
 
 
 class TrainerFactory(Factory):
-    """Factory to create trainer classes.
-    """
+    """Factory to create trainer classes."""
 
     PRODUCTS = {
         "tcc": trainers.TCCTrainer,
