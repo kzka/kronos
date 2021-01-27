@@ -112,6 +112,22 @@ def write_image_to_jpeg(arr, filename, jpeg_quality=95):
     image.save(filename, jpeg_quality=jpeg_quality)
 
 
+def write_image_to_png(arr, filename):
+    """Save a numpy uint8 image array as a PNG image to disk.
+
+    Args:
+        arr (ndarray): A numpy RGB uint8 image.
+        filename (str): The filename of the saved image.
+
+    Raises:
+        ValueError: If the numpy dtype is not uint8.
+    """
+    if arr.dtype is not np.dtype(np.uint8):
+        raise ValueError("Image must be uint8.")
+    image = Image.fromarray(arr)
+    image.save(filename, format='png')
+
+
 def write_audio_to_binary(arr, filename):
     """Save a numpy float64 audio array as a binary npy file.
 

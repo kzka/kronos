@@ -3,3 +3,6 @@ ACTION_CLASS:
   - 143642_embodiment:hex_
   - 143652_embodiment:star_
   - 143701_embodiment:stick_
+
+SAMPLING:
+  IMAGE_EXT: '*.png'

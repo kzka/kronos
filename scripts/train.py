@@ -42,9 +42,9 @@ def main(args):
         evaluators,
     ) = experiment_utils.get_factories(config, device)
 
-    # # Create lr scheduler.
-    # scheduler = ReduceLROnPlateau(
-    #     optimizer, factor=0.5, patience=10, verbose=True)
+    # Create lr scheduler.
+    scheduler = ReduceLROnPlateau(
+        optimizer, factor=0.5, patience=10, verbose=True)
 
     # Create checkpoint manager.
     checkpoint_manager = checkpoint.CheckpointManager(
@@ -125,13 +125,13 @@ def main(args):
                 stopwatch.reset()
             epoch += 1
 
-            # At end of epoch, evaluate validation loss on 20% of the validation
-            # data then step the scheduler.
-            # v_loss = trainer.eval_num_iters(
-            #     loaders["pretrain_valid"],
-            #     int(1.0 * num_valid / config.BATCH_SIZE),
-            # )
-            # scheduler.step(v_loss)
+            # At end of epoch, evaluate validation loss on a fraction of the
+            # validation data, then step the scheduler.
+            v_loss = trainer.eval_num_iters(
+                loaders["pretrain_valid"],
+                int(1.0 * num_valid / config.BATCH_SIZE),
+            )
+            scheduler.step(v_loss)
 
     except KeyboardInterrupt:
         logging.info(

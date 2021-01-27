@@ -186,7 +186,7 @@ def get_dataloaders(config, debug):
 
     # pretraining valid dataset
     valid_dataset = factories.PreTrainingDatasetFactory.from_config(
-        config, "valid", not augment, labeled)
+        config, "valid", True, labeled)
     batch_sampler = factories.BatchSamplerFactory.from_config(
         config, valid_dataset, False, sample_sequential, batch_labeled)
     dloaders["pretrain_valid"] = torch.utils.data.DataLoader(
@@ -199,7 +199,7 @@ def get_dataloaders(config, debug):
     # downstream train dataset
     dloaders["downstream_train"] = {}
     train_downstream_datasets = factories.DownstreamDatasetFactory.from_config(
-        config, "train", not augment, labeled=labeled)
+        config, "train", True, labeled=labeled)
     for (
         action_class,
         train_downstream_dataset,
@@ -222,7 +222,7 @@ def get_dataloaders(config, debug):
     # downstream valid dataset
     dloaders["downstream_valid"] = {}
     valid_downstream_datasets = factories.DownstreamDatasetFactory.from_config(
-        config, "valid", not augment, labeled=labeled)
+        config, "valid", True, labeled=labeled)
     for (
         action_class,
         valid_downstream_dataset,
@@ -249,9 +249,9 @@ class Net(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.model = models.resnet18(pretrained=False)
+        self.model = models.resnet18(pretrained=True)
         num_ftrs = self.model.fc.in_features
-        self.model.fc = nn.Linear(num_ftrs, 32)
+        self.model.fc = nn.Linear(num_ftrs, 64)
 
     def forward(self, x):
         batch_size, t, c, h, w = x.shape
@@ -286,12 +286,10 @@ def get_factories(config, device, debug=None):
     """
     dloaders = get_dataloaders(config, debug)
     # model = factories.ModelFactory.from_config(config)
+    # optimizer = factories.OptimizerFactory.from_config(config, model)
     model = Net()
     model.num_ctx_frames = 1
-    optimizer = torch.optim.Adam(
-        model.parameters(), lr=1e-4, weight_decay=1e-5
-    )
-    # optimizer = factories.OptimizerFactory.from_config(config, model)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-5, weight_decay=1e-5)
     trainer = factories.TrainerFactory.from_config(
         config, model, optimizer, device
     )
@@ -300,8 +298,7 @@ def get_factories(config, device, debug=None):
 
 
 class Stopwatch:
-    """A simple timer for measuring elapsed time.
-    """
+    """A simple timer for measuring elapsed time."""
 
     def __init__(self):
         self.reset()

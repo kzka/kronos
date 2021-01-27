@@ -259,6 +259,7 @@ class EvaluatorFactory(Factory):
         "phase_alignment_topk": evaluators.PhaseAlignmentTopK,
         "cycle_consistency": evaluators.CycleConsistency,
         "nn_visualizer": evaluators.NearestNeighbourVisualizer,
+        "reward_visualizer": evaluators.RewardVisualizer,
         # "linear_probe": evaluators.LinearProbe,
     }
 
@@ -286,8 +287,9 @@ class EvaluatorFactory(Factory):
                 kwargs[
                     "num_frames_per_seq"
                 ] = config.EVAL.LINEAR_PROBE.NUM_FRAMES_PER_SEQ
-            else:
-                raise ValueError(f"{eval_name} is not a supported evaluator.")
+            elif eval_name == 'reward_visualizer':
+                kwargs['l2_normalize'] = (
+                    config.EVAL.REWARD_VISUALIZER.L2_NORMALIZE)
 
             evaluators[eval_name] = cls.create(eval_name, **kwargs)
 

@@ -92,8 +92,11 @@ def unpack_video(args):
         video_to_frames(video_filename, fps, resize)
     ):
         # save frame as jpg
-        file_utils.write_image_to_jpeg(
-            frame, os.path.join(video_dir, "{}.jpg".format(i))
+        # file_utils.write_image_to_jpeg(
+        #     frame, os.path.join(video_dir, "{}.jpg".format(i))
+        # )
+        file_utils.write_image_to_png(
+            frame, os.path.join(video_dir, "{}.png".format(i))
         )
         tstamps.append(tstamp)
     # save frame timestamps as single txt file

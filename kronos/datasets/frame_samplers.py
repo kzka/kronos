@@ -9,8 +9,7 @@ from kronos.utils.file_utils import get_files
 
 
 class FrameSampler(abc.ABC):
-    """Video frame sampler base abstraction.
-    """
+    """Video frame sampler base abstraction."""
 
     def __init__(
         self,
@@ -46,8 +45,7 @@ class FrameSampler(abc.ABC):
         self.seed_rng()
 
     def seed_rng(self):
-        """Reseed the RNG.
-        """
+        """Reseed the RNG."""
         if self._seed is not None:
             random.seed(self._seed)
 
@@ -161,8 +159,7 @@ class MultiVideoFrameSampler(FrameSampler):
 
 
 class StridedSampler(SingleVideoFrameSampler):
-    """Sample every n'th frame of a video.
-    """
+    """Sample every n'th frame of a video."""
 
     def __init__(
         self,
@@ -267,8 +264,7 @@ class AllSampler(StridedSampler):
 
 
 class OffsetUniformSampler(SingleVideoFrameSampler):
-    """Uniformly sample video frames starting from an offset.
-    """
+    """Uniformly sample video frames starting from an offset."""
 
     def __init__(
         self,
@@ -302,8 +298,7 @@ class OffsetUniformSampler(SingleVideoFrameSampler):
 
 
 class WindowSampler(SingleVideoFrameSampler):
-    """Samples a contiguous window of frames.
-    """
+    """Samples a contiguous window of frames."""
 
     def _sample(self, frames, num_frames, phase_indices=None):
         vid_len = len(frames)
@@ -315,8 +310,7 @@ class WindowSampler(SingleVideoFrameSampler):
 
 
 class PhaseSampler(SingleVideoFrameSampler):
-    """Uniformly sample video frames starting from an offset.
-    """
+    """Uniformly sample video frames starting from an offset."""
 
     def __init__(
         self,
