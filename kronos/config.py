@@ -34,15 +34,20 @@ _C.FP16_OPT = 0
 _C.TRAINING_ALGO = "tcc"
 
 _C.BATCH_SIZE = 4
-_C.TRAIN_MAX_ITERS = 20_000
+_C.TRAIN_MAX_ITERS = 8_000
 
 # "pngdir"
-_C.DATASET = "/home/kevin/Desktop/all_but_gripper"
+# all_but_gripper
+_C.DATASET = "/home/kevin/Desktop/pngdir"
 
 # which action classes to select for creating
 # the dataset.
 # leave it empty to load all action classes.
 _C.ACTION_CLASS = []
+
+# Restrict the number of videos per class. This is useful for experiments that
+# test sample complexity based on the number of pretraining demonstrations.
+_C.MAX_VIDS_PER_CLASS = 1
 
 # ============================================== #
 # Frame sampling params

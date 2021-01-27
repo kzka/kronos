@@ -3,7 +3,7 @@ from .phase_alignment import PhaseAlignmentTopK
 from .cycle_consistency import CycleConsistency
 from .nn_visualizer import NearestNeighbourVisualizer
 from .reward_visualizer import RewardVisualizer
-# from .probe import LinearProbe
+from .probe import LinearProbe
 
 __all__ = [
     "KendallsTau",
@@ -11,4 +11,5 @@ __all__ = [
     "CycleConsistency",
     "NearestNeighbourVisualizer",
     "RewardVisualizer",
+    "LinearProbe",
 ]

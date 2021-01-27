@@ -68,7 +68,7 @@ class StratifiedBatchSampler(VideoBatchSampler):
         class_indices = [c.tolist() for c in class_indices]
 
         self.idxs = []
-        end = self.batch_size * (len(all_idxs) // self.batch_size)
+        end = int(self.batch_size * np.ceil(len(all_idxs) / self.batch_size))
         for i in range(0, end, self.batch_size):
             batch = []
             class_perm = np.random.permutation(classes)[:self.batch_size]
@@ -121,10 +121,9 @@ class RandomBatchSampler(VideoBatchSampler):
             all_idxs.extend(idxs)
         # Shuffle the indices.
         all_idxs = [all_idxs[i] for i in torch.randperm(len(all_idxs))]
-        # Split the list of indices into chunks of len `batch_size`, ensuring
-        # we drop the last chunk if it is not of adequate length.
+        # Split the list of indices into chunks of len `batch_size`.
         self.idxs = []
-        end = self.batch_size * (len(all_idxs) // self.batch_size)
+        end = int(self.batch_size * np.ceil(len(all_idxs) / self.batch_size))
         for i in range(0, end, self.batch_size):
             xs = all_idxs[i : i + self.batch_size]
             self.idxs.append(xs)

@@ -12,7 +12,6 @@ from torch.utils.data import Dataset
 
 from kronos.utils import file_utils
 from kronos.datasets import tensorizers, transforms
-from ipdb import set_trace
 
 
 class VideoDataset(Dataset):
@@ -26,6 +25,7 @@ class VideoDataset(Dataset):
         augment_params=None,
         image_size=None,
         seed=None,
+        max_vids_per_class=-1,
     ):
         """Constructor.
 
@@ -52,27 +52,25 @@ class VideoDataset(Dataset):
         self._frame_sampler = frame_sampler
         self._labeled = labeled
         self._seed = seed
+        self._max_vids_per_class = max_vids_per_class
         if augment_params is not None:
-            # data augmentation is only applied on the video frames
+            # Data augmentation is only applied on the video frames.
             self._augmentor = transforms.Augmentor(
-                "frames", augment_params, image_size
-            )
+                "frames", augment_params, image_size)
         else:
             self._augmentor = None
         self._totensor = tensorizers.ToTensor()
 
-        # seed the RNG
         self.seed_rng()
 
-        # get list of available dirs and check that it is not empty
+        # Get list of available dirs and check that it is not empty.
         self._available_dirs = file_utils.get_subdirs(
-            self._root_dir, nonempty=True
-        )
+            self._root_dir, nonempty=True)
         if len(self._available_dirs) == 0:
             raise ValueError("{} is an empty directory.".format(root_dir))
         self._allowed_dirs = self._available_dirs
 
-        # build a directory tree
+        # Build a directory tree.
         self._build_dir_tree()
 
     def seed_rng(self):
@@ -107,6 +105,8 @@ class VideoDataset(Dataset):
             else:
                 vids = file_utils.get_subdirs(path, nonempty=False)
                 if len(vids) > 0:
+                    if self._max_vids_per_class > 0:
+                        vids = vids[:self._max_vids_per_class]
                     self._dir_tree[path] = vids
 
     def restrict_subdirs(self, subdirs):

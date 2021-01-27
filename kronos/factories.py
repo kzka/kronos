@@ -24,8 +24,7 @@ class Factory(abc.ABC):
 
     @classmethod
     def create(cls, name, *args, **kwargs):
-        """Create a factory object by its name and args.
-        """
+        """Create a factory object by its name and args."""
         if name not in cls.PRODUCTS:
             raise KeyError("{} is not supported.".format(name))
 
@@ -33,14 +32,12 @@ class Factory(abc.ABC):
 
     @abc.abstractclassmethod
     def from_config(cls, config):
-        """Create a factory object from a config.
-        """
+        """Create a factory object from a config."""
         pass
 
 
 class FrameSamplerFactory(Factory):
-    """Factory to create frame samplers.
-    """
+    """Factory to create frame samplers."""
 
     PRODUCTS = {
         "all": frame_samplers.AllSampler,
@@ -103,39 +100,29 @@ class DatasetFactory(Factory):
         else:
             augment = config.AUGMENTATION.EVAL
 
-        # restrict action classes if they have been
-        # provided.
-        # else, load all from the data directory.
+        # Restrict action classes if they have been provided. Else, load all
+        # from the data directory.
         if config.ACTION_CLASS:
             action_classes = config.ACTION_CLASS
         else:
             action_classes = file_utils.get_subdirs(
-                dataset_path, basename=True, nonempty=True
-            )
+                dataset_path, basename=True, nonempty=True)
 
-        # figure out image size
         image_size = config.IMAGE_SIZE
         if isinstance(image_size, int):
             image_size = (image_size, image_size)
         image_size = tuple(image_size)
 
+        # The minimum obligatory data augmentation we want to keep is resize
+        # and mean-var normalization.
         if debug:
-            # The minimum obligatory data augmentation we want to keep is resize
-            # and mean-var normalization.
-            # augment = ["global_resize", "normalize"]
-            augment = ["global_resize"]
-
-        # print('Action classes: \n')
-        # for action_class in action_classes:
-        #     print(f'\t{action_class}')
-        # print('\n')
+            augment = ["global_resize"]  # ["global_resize", "normalize"]
 
         if downstream:
             dataset = {}
             for action_class in action_classes:
                 frame_sampler = FrameSamplerFactory.from_config(
-                    config, downstream=True
-                )
+                    config, downstream=True)
                 single_class_dataset = cls.create(
                     config.TRAINING_ALGO,
                     dataset_path,
@@ -144,13 +131,12 @@ class DatasetFactory(Factory):
                     seed=config.SEED,
                     augment_params=augment,
                     image_size=image_size,
-                )
+                    max_vids_per_class=config.MAX_VIDS_PER_CLASS)
                 single_class_dataset.restrict_subdirs(action_class)
                 dataset[action_class] = single_class_dataset
         else:
             frame_sampler = FrameSamplerFactory.from_config(
-                config, downstream=False
-            )
+                config, downstream=False)
             dataset = cls.create(
                 config.TRAINING_ALGO,
                 dataset_path,
@@ -159,7 +145,7 @@ class DatasetFactory(Factory):
                 seed=config.SEED,
                 augment_params=augment,
                 image_size=image_size,
-            )
+                max_vids_per_class=config.MAX_VIDS_PER_CLASS)
             dataset.restrict_subdirs(action_classes)
 
         return dataset
@@ -176,8 +162,7 @@ class PreTrainingDatasetFactory(DatasetFactory):
 
 
 class DownstreamDatasetFactory(DatasetFactory):
-    """Factory to create downstream task datasets.
-    """
+    """Factory to create downstream task datasets."""
 
     PRODUCTS = DatasetFactory.PRODUCTS
 
@@ -203,15 +188,13 @@ class BatchSamplerFactory(Factory):
                 config.SAMPLING.DOWNSTREAM_BATCH_SAMPLER,
                 dataset.dir_tree,
                 sequential=True if debug else False,
-                labeled=labeled,
-            )
+                labeled=labeled)
         return cls.create(
             config.SAMPLING.PRETRAIN_BATCH_SAMPLER,
             dataset.dir_tree,
             config.BATCH_SIZE,
             sequential=True if debug else False,
-            labeled=labeled,
-        )
+            labeled=labeled)
 
 
 class TrainerFactory(Factory):
@@ -232,13 +215,11 @@ class TrainerFactory(Factory):
             optimizer,
             device,
             config.FP16_OPT,
-            config,
-        )
+            config)
 
 
 class EvaluatorFactory(Factory):
-    """Factory to create downstream task evaluators.
-    """
+    """Factory to create downstream task evaluators."""
 
     PRODUCTS = {
         "kendalls_tau": evaluators.KendallsTau,
@@ -246,7 +227,7 @@ class EvaluatorFactory(Factory):
         "cycle_consistency": evaluators.CycleConsistency,
         "nn_visualizer": evaluators.NearestNeighbourVisualizer,
         "reward_visualizer": evaluators.RewardVisualizer,
-        # "linear_probe": evaluators.LinearProbe,
+        "linear_probe": evaluators.LinearProbe,
     }
 
     @classmethod
@@ -283,8 +264,7 @@ class EvaluatorFactory(Factory):
 
 
 class ModelFactory(Factory):
-    """Factory to create models.
-    """
+    """Factory to create models."""
 
     PRODUCTS = {
         "tcc": models.TCCNet,
