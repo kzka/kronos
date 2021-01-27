@@ -75,20 +75,7 @@ class FrameSamplerFactory(Factory):
 
 
 class DatasetFactory(Factory):
-    """Base dataset factory.
-    """
-
-    PATHS = {
-        "penn_action": CONFIG.DIRS.PENN_ACTION_DIR,
-        "mime": CONFIG.DIRS.MIME_DIR,
-        "chamfer": CONFIG.DIRS.CHAMFER_DIR,
-        "embodied_flip_book": CONFIG.DIRS.EMBODIED_FLIP_BOOK_DIR,
-        "embodied_glasses": CONFIG.DIRS.EMBODIED_GLASSES_DIR,
-        "embodied_cup_in_plate": CONFIG.DIRS.EMBODIED_CUP_IN_PLATE_DIR,
-        "embodied_pens_in_cup": CONFIG.DIRS.EMBODIED_PENS_IN_CUP_DIR,
-        "demo": CONFIG.DIRS.DEMO_DIR,
-        "magical": CONFIG.DIRS.MAGICAL_DIR,
-    }
+    """Base dataset factory."""
 
     PRODUCTS = {
         "tcc": datasets.VideoDataset,
@@ -101,15 +88,15 @@ class DatasetFactory(Factory):
     def from_config(
         cls, config, downstream, split, debug=False, labeled=None,
     ):
-        """Create a dataset directly from a config.
-        """
+        """Create a dataset directly from a config."""
+
         assert split in [
             "train",
             "valid",
         ], "{} is not a supported split.".format(split)
 
-        print(f"Dataset: {cls.PATHS[config.DATASET]}")
-        dataset_path = osp.join(cls.PATHS[config.DATASET], split)
+        print(f"Dataset: {config.DATASET}")
+        dataset_path = osp.join(config.DATASET, split)
 
         if split == "train":
             augment = config.AUGMENTATION.TRAIN

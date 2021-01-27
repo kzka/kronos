@@ -22,7 +22,7 @@ from kronos.config import CONFIG
 
 ENV_NAME = 'MatchRegions-Test{}-v0'
 L2_NORMALIZE = True
-EXPERIMENT_NAME = 'all_but_gripper'  # 'again_l2'
+EXPERIMENT_NAME = 'again_l2'  # 'all_but_gripper'  # 'again_l2'
 
 
 @torch.no_grad()

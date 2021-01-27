@@ -15,22 +15,7 @@ _C = CN()
 _C.DIRS = CN()
 
 _C.DIRS.DIR = osp.dirname(osp.realpath(__file__))
-
 _C.DIRS.LOG_DIR = "/tmp/kronos/"
-
-_C.DIRS.PENN_ACTION_DIR = osp.join(_C.DIRS.DIR, "data/Penn_Action/")
-_C.DIRS.MIME_DIR = osp.join(_C.DIRS.DIR, "data/mime_processed/")
-_C.DIRS.DEMO_DIR = osp.join(_C.DIRS.DIR, "data/reptile/")
-_C.DIRS.EMBODIED_DIR = osp.join(_C.DIRS.DIR, "data/embodied/")
-_C.DIRS.EMBODIED_PENS_IN_CUP_DIR = osp.join(_C.DIRS.EMBODIED_DIR, "embodied_pens_in_two_cups/")
-_C.DIRS.EMBODIED_FLIP_BOOK_DIR = osp.join(_C.DIRS.EMBODIED_DIR, "embodied_flip_book/")
-_C.DIRS.EMBODIED_CUP_IN_PLATE_DIR = osp.join(_C.DIRS.EMBODIED_DIR, "embodied_cup_in_plate/")
-_C.DIRS.EMBODIED_GLASSES_DIR = osp.join(_C.DIRS.EMBODIED_DIR, "embodied_glasses/")
-_C.DIRS.CHAMFER_DIR = osp.join(_C.DIRS.DIR, "data/beta/")
-_C.DIRS.MAGICAL_DIR = "/home/kevin/Desktop/all_but_gripper"
-
-# gripper_self: "/home/kevin/Desktop/pngdir"
-# gripper_others: "/home/kevin/Desktop/all_but_gripper"
 
 # ============================================== #
 # Experiment params
@@ -50,7 +35,10 @@ _C.TRAINING_ALGO = "tcc"
 
 _C.BATCH_SIZE = 4
 _C.TRAIN_MAX_ITERS = 20_000
-_C.DATASET = "magical"
+
+# "magical"
+# "/home/kevin/Desktop/all_but_gripper"
+_C.DATASET = "/home/kevin/Desktop/pngdir"
 
 # which action classes to select for creating
 # the dataset.
