@@ -19,20 +19,18 @@ from kronos.utils import experiment_utils
 def main(args):
     log_dir = osp.join(CONFIG.DIRS.LOG_DIR, "debug")
 
-    # initialize experiment
+    # Initialize experiment
     config, device = experiment_utils.init_experiment(
-        log_dir, CONFIG, args.config_path, transient=True
-    )
+        log_dir, CONFIG, args.config_path, transient=True)
 
-    # load model, data loaders and trainer
+    # Load model, data loaders and trainer.
     debug = {
         "sample_sequential": not args.shuffle,
         "augment": args.augment,
         "num_workers": 0,
     }
     model, optimizer, loaders, trainer, _ = experiment_utils.get_factories(
-        config, device, debug=debug
-    )
+        config, device, debug=debug)
 
     num_ctx_frames = config.SAMPLING.NUM_CONTEXT_FRAMES
     num_frames = config.SAMPLING.NUM_FRAMES_PER_SEQUENCE
@@ -72,17 +70,9 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--viz_context",
-        type=lambda s: s.lower() in ["true", "1"],
-        default=False,
-    )
-    parser.add_argument(
-        "--shuffle", type=lambda s: s.lower() in ["true", "1"], default=False
-    )
-    parser.add_argument(
-        "--augment", type=lambda s: s.lower() in ["true", "1"], default=True
-    )
     parser.add_argument("--config_path", type=str, default=None)
+    parser.add_argument("--viz_context", action='store_true')
+    parser.add_argument("--shuffle", action='store_true')
+    parser.add_argument("--augment", action='store_true')
     args = parser.parse_args()
     main(args)

@@ -49,7 +49,11 @@ _C.ACTION_CLASS = []
 # ============================================== #
 _C.SAMPLING = CN()
 
-_C.SAMPLING.PRETRAIN_BATCH_SAMPLER = "stratified"  # "same_action"
+# can be one of:
+# 'same_action', 'random', 'stratified'.
+_C.SAMPLING.PRETRAIN_BATCH_SAMPLER = "random"
+
+# This should always be set to 'same_action_downstream'
 _C.SAMPLING.DOWNSTREAM_BATCH_SAMPLER = "same_action_downstream"
 
 # the widlcard pattern for the video frames
