@@ -28,7 +28,9 @@ _C.DIRS.EMBODIED_CUP_IN_PLATE_DIR = osp.join(_C.DIRS.EMBODIED_DIR, "embodied_cup
 _C.DIRS.EMBODIED_GLASSES_DIR = osp.join(_C.DIRS.EMBODIED_DIR, "embodied_glasses/")
 _C.DIRS.CHAMFER_DIR = osp.join(_C.DIRS.DIR, "data/beta/")
 _C.DIRS.MAGICAL_DIR = "/home/kevin/Desktop/all_but_gripper"
-# "/home/kevin/Desktop/pngdir"  # "/home/kevin/repos/magical_early"
+
+# gripper_self: "/home/kevin/Desktop/pngdir"
+# gripper_others: "/home/kevin/Desktop/all_but_gripper"
 
 # ============================================== #
 # Experiment params
