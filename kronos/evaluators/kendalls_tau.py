@@ -41,7 +41,7 @@ class KendallsTau(Evaluator):
         dist = exp / np.sum(exp)
         return dist
 
-    def _evaluate(self, embs, labels, frames, fit=False):
+    def _evaluate(self, embs, labels, frames, fit=False, recons=None):
         """Get pairwise nearest-neighbours then calculate Kendall's Tau.
         """
         num_embs = len(embs)

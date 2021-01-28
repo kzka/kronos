@@ -33,14 +33,17 @@ class RewardVisualizer(Evaluator):
     def _gen_reward_plot(self, rewards):
         """Create a pyplot plot and save to buffer."""
         fig, axes = plt.subplots(1, len(rewards),
-            figsize=(6.4*self.num_plots, 4.8))
+            figsize=(6.4*len(rewards), 4.8))
+        if len(rewards) == 1:
+            axes = [axes]
         for i, rew in enumerate(rewards):
             axes[i].plot(rew)
         fig.text(0.5, 0.04, 'Timestep', ha='center')
         fig.text(0.04, 0.5, 'Reward', va='center', rotation='vertical')
         fig.canvas.draw()
-        img_arr = np.array(fig.canvas.renderer.buffer_rgba())
-        return img_arr[:, :, :3]
+        img_arr = np.array(fig.canvas.renderer.buffer_rgba())[:, :, :3]
+        plt.close()
+        return img_arr
 
     def _compute_goal_emb(self, embs):
         goal_emb = [emb[-1, :] for emb in embs]
@@ -50,10 +53,12 @@ class RewardVisualizer(Evaluator):
         goal_emb = np.mean(goal_emb, axis=0, keepdims=True)
         return goal_emb
 
-    def _evaluate(self, embs, labels, frames, fit=False):
+    def _evaluate(self, embs, labels, frames, fit=False, recons=None):
         goal_emb = self._compute_goal_emb(embs)
+        # Make sure we sample only as many as are available.
+        num_plots = min(len(embs), self.num_plots)
         rand_idxs = np.random.choice(
-            np.arange(len(embs)), size=self.num_plots, replace=False)
+            np.arange(len(embs)), size=num_plots, replace=False)
         rewards = []
         for idx in rand_idxs:
             emb = embs[idx]

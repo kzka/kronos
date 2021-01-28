@@ -72,6 +72,25 @@ class Trainer(abc.ABC):
         """
         pass
 
+    def compute_aux_loss(self, frames, reconstruction, steps, seq_lens):
+        """Compute an auxiliary loss on a single batch.
+
+        Args:
+            frames (torch.FloatTensor): The video frames.
+            reconstruction (torch.FloatTensor): The reconstructed frames.
+            steps (torch.LongTensor): The frame indices for the frames of each
+                video in the batch.
+            seq_lens (torch.LongTensor) The original length or number of frames
+                of each video in the batch.
+
+        Returns:
+            A tensor corresponding to the value of the auxiliary loss function
+            evaluated on the given batch.
+
+        :meta public:
+        """
+        return None
+
     def train_one_iter(self, batch, global_step):
         """Single forward + backward pass of the model.
 
@@ -93,10 +112,15 @@ class Trainer(abc.ABC):
         self._optimizer.zero_grad()
 
         # forward through model
-        embs = self._model(frames)["embs"]
+        out = self._model(frames)
+        embs = out["embs"]
 
         # compute loss
         loss = self.compute_loss(embs, steps, seq_lens, phase_labels)
+        aux_loss = self.compute_aux_loss(
+            frames, out['reconstruction'], steps, seq_lens)
+        if aux_loss is not None:
+            loss = loss + aux_loss
 
         # scale loss for mixed precision
         if self._opt_lvl > 0 and IS_APEX:

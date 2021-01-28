@@ -42,6 +42,7 @@ class FrameSamplerFactory(Factory):
     PRODUCTS = {
         "all": frame_samplers.AllSampler,
         "stride": frame_samplers.StridedSampler,
+        "variable_stride": frame_samplers.VariableStridedSampler,
         "offset_uniform": frame_samplers.OffsetUniformSampler,
         "window": frame_samplers.WindowSampler,
         "phase": frame_samplers.PhaseSampler,
@@ -79,6 +80,7 @@ class DatasetFactory(Factory):
         "stcc": datasets.VideoDataset,
         "sal": datasets.VideoDataset,
         "svtcn": datasets.VideoDataset,
+        "contrastive": datasets.VideoDataset,
     }
 
     @classmethod
@@ -205,6 +207,7 @@ class TrainerFactory(Factory):
         "stcc": trainers.SubTCCTrainer,
         "sal": trainers.SALTrainer,
         "svtcn": trainers.SVTCNTrainer,
+        "contrastive": trainers.ContrastiveTrainer,
     }
 
     @classmethod
@@ -228,6 +231,7 @@ class EvaluatorFactory(Factory):
         "nn_visualizer": evaluators.NearestNeighbourVisualizer,
         "reward_visualizer": evaluators.RewardVisualizer,
         "linear_probe": evaluators.LinearProbe,
+        "reconstruction_visualizer": evaluators.ReconstructionVisualizer,
     }
 
     @classmethod
@@ -254,6 +258,10 @@ class EvaluatorFactory(Factory):
                 kwargs[
                     "num_frames_per_seq"
                 ] = config.EVAL.LINEAR_PROBE.NUM_FRAMES_PER_SEQ
+            elif eval_name == "reconstruction_visualizer":
+                kwargs.pop("distance")
+                kwargs["num_frames"] = 2
+                kwargs["num_ctx_frames"] = config.SAMPLING.NUM_CONTEXT_FRAMES
             elif eval_name == 'reward_visualizer':
                 kwargs['l2_normalize'] = (
                     config.EVAL.REWARD_VISUALIZER.L2_NORMALIZE)

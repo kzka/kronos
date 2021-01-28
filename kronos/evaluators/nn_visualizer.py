@@ -9,8 +9,7 @@ from kronos.datasets.transforms import UnNormalize
 
 
 class NearestNeighbourVisualizer(Evaluator):
-    """Nearest-neighbour frame visualizer.
-    """
+    """Nearest-neighbour frame visualizer."""
 
     def __init__(self, distance, num_frames, num_ctx_frames):
         """Constructor.
@@ -27,17 +26,15 @@ class NearestNeighbourVisualizer(Evaluator):
         """
         if distance not in ["sqeuclidean", "cosine"]:
             raise ValueError(
-                "{} is not a supported distance metric.".format(distance)
-            )
+                "{} is not a supported distance metric.".format(distance))
 
         self.distance = distance
         self.num_frames = num_frames
         self.num_ctx_frames = num_ctx_frames
 
-    def _evaluate(self, embs, labels, frames, fit=False):
-        """Get pairwise nearest-neighbour frames.
-        """
-        # reshape images
+    def _evaluate(self, embs, labels, frames, fit=False, recons=None):
+        """Get pairwise nearest-neighbour frames."""
+        # Reshape images.
         for i in range(len(frames)):
             b, s, c, h, w = frames[i].shape
             seq_len = s // self.num_ctx_frames

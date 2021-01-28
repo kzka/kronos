@@ -4,6 +4,7 @@ from .cycle_consistency import CycleConsistency
 from .nn_visualizer import NearestNeighbourVisualizer
 from .reward_visualizer import RewardVisualizer
 from .probe import LinearProbe
+from .reconstruction_visualizer import ReconstructionVisualizer
 
 __all__ = [
     "KendallsTau",
@@ -12,4 +13,5 @@ __all__ = [
     "NearestNeighbourVisualizer",
     "RewardVisualizer",
     "LinearProbe",
+    "ReconstructionVisualizer",
 ]

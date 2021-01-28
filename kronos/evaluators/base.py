@@ -91,12 +91,12 @@ class Evaluator(abc.ABC):
             # actions.
             if len(valid_loader) == 0:
                 logging.info(
-                    "Skipping {} since it is empty.".format(action_name)
-                )
+                    "Skipping {} since it is empty.".format(action_name))
                 continue
 
             # compute embeddings
             embeddings, labels, videos = [], [], []
+            recons = []
             for batch_idx, batch in enumerate(valid_loader):
                 if eval_iters is not None and batch_idx >= eval_iters:
                     break
@@ -104,9 +104,7 @@ class Evaluator(abc.ABC):
                 videos.append(frames.cpu())
                 if frames.shape[1] > max_batch_size:
                     embs = []
-                    for i in range(
-                        math.ceil(frames.shape[1] / max_batch_size)
-                    ):
+                    for i in range(math.ceil(frames.shape[1] / max_batch_size)):
                         sub_frames = frames[
                             :, i * max_batch_size : (i + 1) * max_batch_size
                         ].to(device)
@@ -114,7 +112,10 @@ class Evaluator(abc.ABC):
                         embs.append(sub_embs.cpu())
                     embs = torch.cat(embs, dim=1)
                 else:
-                    embs = model(frames.to(device))["embs"]
+                    out = model(frames.to(device))
+                    embs = out["embs"]
+                    if "reconstruction" in out:
+                        recons.append(out["reconstruction"].cpu())
                 embeddings.append(embs.cpu().squeeze().numpy())
                 # if "phase_idxs" in batch:
                 if "debris_nums" in batch:
@@ -123,8 +124,7 @@ class Evaluator(abc.ABC):
             if not labels:
                 labels = None
             res = self._evaluate(
-                embeddings, labels, videos, fit=(msg == "train")
-            )
+                embeddings, labels, videos, fit=(msg == "train"), recons=recons)
             if "scalar" in res:
                 scalars.append(res["scalar"])
             if "image" in res:

@@ -30,11 +30,11 @@ _C.SEED = 1
 # can be one of [0, 1, 2].
 _C.FP16_OPT = 0
 
-# can be one of: ['tcc', 'sal', 'svtcn]
-_C.TRAINING_ALGO = "tcc"
+# can be one of: ['tcc', 'sal', 'contrastive']
+_C.TRAINING_ALGO = "contrastive"
 
 _C.BATCH_SIZE = 4
-_C.TRAIN_MAX_ITERS = 8_000
+_C.TRAIN_MAX_ITERS = 5_000
 
 # "pngdir"
 # all_but_gripper
@@ -47,7 +47,7 @@ _C.ACTION_CLASS = []
 
 # Restrict the number of videos per class. This is useful for experiments that
 # test sample complexity based on the number of pretraining demonstrations.
-_C.MAX_VIDS_PER_CLASS = 1
+_C.MAX_VIDS_PER_CLASS = 1000
 
 # ============================================== #
 # Frame sampling params
@@ -67,8 +67,8 @@ _C.SAMPLING.IMAGE_EXT = "*.png"
 ## TCC
 
 # can be one of:
-# 'all', 'stride', 'offset_uniform', 'svtcn'
-_C.SAMPLING.STRATEGY = "offset_uniform"
+# 'all', 'stride', 'offset_uniform', 'variable_stride'
+_C.SAMPLING.STRATEGY = "variable_stride" # "offset_uniform"
 
 _C.SAMPLING.CONTEXT_STRIDE = 3
 _C.SAMPLING.STRIDE_ALL_SAMPLER = 1
@@ -129,10 +129,11 @@ _C.EVAL.VAL_ITERS = 10
 _C.EVAL.DOWNSTREAM_TASK_EVALUATORS = [
     # "linear_probe",
     "reward_visualizer",
-    "kendalls_tau",
+    # "kendalls_tau",
     # 'phase_alignment_topk',
     # 'cycle_consistency',
-    "nn_visualizer",
+    # "nn_visualizer",
+    "reconstruction_visualizer",
 ]
 
 # what distance metric to use in the
@@ -253,6 +254,9 @@ _C.LOSS.MARGIN = 1.0
 # [1.0, 0.99, 0.9, 0.5, 0.1, 0.01, 0.0]
 _C.LOSS.WEIGHT_TCC = 0.9
 _C.LOSS.MARGIN_HINGE = 0.3
+
+_C.LOSS.AUX_LOSS = CN()
+_C.LOSS.AUX_LOSS.TYPE = 'autoencoding'
 
 # ============================================== #
 # Optimizer params

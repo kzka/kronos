@@ -52,7 +52,8 @@ def main(args):
         checkpoint_dir, device)
 
     global_step = checkpoint_manager.restore_or_initialize()
-    epoch = int(global_step / len(loaders["pretrain_train"]))
+    total_batches = max(1, len(loaders["pretrain_train"]))
+    epoch = int(global_step / total_batches)
     num_valid = loaders["pretrain_valid"].dataset.total_vids
     valid_iters = config.EVAL.VAL_ITERS * config.BATCH_SIZE
     complete = False
@@ -70,11 +71,9 @@ def main(args):
 
                 if not global_step % config.LOGGING.REPORT_INTERVAL:
                     train_eval_loss = trainer.eval_num_iters(
-                        loaders["pretrain_train"], 20
-                    )
+                        loaders["pretrain_train"], 20)
                     valid_loss = trainer.eval_num_iters(
-                        loaders["pretrain_valid"], 20
-                    )
+                        loaders["pretrain_valid"], 20)
                     losses = {
                         "train": loss,
                         "valid": valid_loss,
@@ -125,13 +124,13 @@ def main(args):
                 stopwatch.reset()
             epoch += 1
 
-            # At end of epoch, evaluate validation loss on a fraction of the
-            # validation data, then step the scheduler.
-            v_loss = trainer.eval_num_iters(
-                loaders["pretrain_valid"],
-                int(1.0 * num_valid / config.BATCH_SIZE),
-            )
-            scheduler.step(v_loss)
+            # # At end of epoch, evaluate validation loss on a fraction of the
+            # # validation data, then step the scheduler.
+            # v_loss = trainer.eval_num_iters(
+            #     loaders["pretrain_valid"],
+            #     int(1.0 * max(1, num_valid / config.BATCH_SIZE)),
+            # )
+            # scheduler.step(v_loss)
 
     except KeyboardInterrupt:
         logging.info(

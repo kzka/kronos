@@ -230,6 +230,48 @@ class StridedSampler(SingleVideoFrameSampler):
             return cc_idxs
 
 
+class VariableStridedSampler(SingleVideoFrameSampler):
+    """Strided sampling based on a video's number of frames."""
+
+    def __init__(
+        self,
+        num_frames,
+        offset=True,
+        num_ctx_frames=1,
+        ctx_stride=1,
+        pattern="*.jpg",
+        seed=None,
+    ):
+        """Constructor.
+
+        Args:
+            stride (int): The spacing between consecutively sampled
+                frames. A stride of 1 is equivalent to `AllSampler`.
+            offset (bool): If set to `True`, a random starting
+                point is chosen along the length of the video. Else,
+                the sampling starts at the 0th frame.
+        """
+        super().__init__(num_frames, num_ctx_frames, ctx_stride, pattern, seed)
+
+        self._offset = offset
+
+    def _sample(self, frames, num_frames=None, phase_indices=None):
+        del phase_indices
+        assert num_frames is not None
+
+        vid_len = len(frames)
+        stride = int(np.ceil(vid_len / num_frames))
+        offset = 0
+        # The offset can be set between 0 and the maximum location from which we
+        # can get total coverage of the video without having to pad.
+        if self._offset:
+            offset = random.randint(0, max(1, vid_len - stride * num_frames))
+        cc_idxs = list(range(offset, offset + num_frames * stride + 1, stride))
+        cc_idxs = np.clip(cc_idxs, a_min=0, a_max=vid_len - 1)
+        cc_idxs = cc_idxs[:num_frames]
+        return cc_idxs
+
+
 class AllSampler(StridedSampler):
     """Sample all the frames of a video.
 

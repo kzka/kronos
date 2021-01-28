@@ -38,7 +38,7 @@ class PhaseAlignmentTopK(Evaluator):
         self.numk = len(topk)
         self.num_ctx_frames = num_ctx_frames
 
-    def _evaluate(self, embs, labels, frames, fit=False):
+    def _evaluate(self, embs, labels, frames, fit=False, recons=None):
         """Get pairwise nearest-neighbours then calculate phase alignment accuracy.
         """
         # reshape images

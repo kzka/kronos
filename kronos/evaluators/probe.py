@@ -25,7 +25,7 @@ class LinearProbe(Evaluator):
         self.clf = LogisticRegression(multi_class="multinomial", max_iter=5000)
         self.scaler = StandardScaler()
 
-    def _evaluate(self, embs, labels, frames, fit=False):
+    def _evaluate(self, embs, labels, frames, fit=False, recons=None):
         """Get pairwise nearest-neighbour frames.
         """
         X_train, y_train = [], []

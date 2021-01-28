@@ -88,8 +88,8 @@ def deterministic_tcc_loss(
     huber_delta,
     normalize_indices,
 ):
-    """Deterministic alignment between all pairs of sequences in a batch.
-    """
+    """Deterministic alignment between all pairs of sequences in a batch."""
+
     batch_size = embs.shape[0]
 
     labels_list = []

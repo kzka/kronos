@@ -26,6 +26,7 @@ class VideoBatchSampler(Sampler):
         pass
 
 
+# TODO(kevin): Not happy with the implementation. Should fix down the line.
 class StratifiedBatchSampler(VideoBatchSampler):
     """Ensures we have a representative of every class in a batch."""
 
@@ -68,7 +69,7 @@ class StratifiedBatchSampler(VideoBatchSampler):
         class_indices = [c.tolist() for c in class_indices]
 
         self.idxs = []
-        end = int(self.batch_size * np.ceil(len(all_idxs) / self.batch_size))
+        end = self.batch_size * (len(all_idxs) // self.batch_size)
         for i in range(0, end, self.batch_size):
             batch = []
             class_perm = np.random.permutation(classes)[:self.batch_size]
@@ -121,9 +122,16 @@ class RandomBatchSampler(VideoBatchSampler):
             all_idxs.extend(idxs)
         # Shuffle the indices.
         all_idxs = [all_idxs[i] for i in torch.randperm(len(all_idxs))]
+
+        # If we have less total videos than the batch size, we pad with clones
+        # until we reach a length of batch_size.
+        if len(all_idxs) < self.batch_size:
+            while len(all_idxs) < self.batch_size:
+                all_idxs.append(all_idxs[np.random.randint(0, len(all_idxs))])
+
         # Split the list of indices into chunks of len `batch_size`.
         self.idxs = []
-        end = int(self.batch_size * np.ceil(len(all_idxs) / self.batch_size))
+        end = self.batch_size * (len(all_idxs) // self.batch_size)
         for i in range(0, end, self.batch_size):
             xs = all_idxs[i : i + self.batch_size]
             self.idxs.append(xs)
@@ -238,10 +246,9 @@ class SameClassBatchSampler(VideoBatchSampler):
 class SameClassBatchSamplerDownstream(SameClassBatchSampler):
     """A same class batch sampler with a batch size of 1.
 
-    This batch sampler is used in downstream datasets. Since
-    downstream datasets need to load a variable number of
-    frames per video, we cannot load more than 1 video per
-    batch.
+    This batch sampler is used in downstream datasets. Since downstream datasets
+    need to load a variable number of frames per video, we cannot load more than
+    1 video per batch.
     """
 
     def __init__(self, dir_tree, sequential=False, labeled=False):
@@ -255,10 +262,3 @@ class SameClassBatchSamplerDownstream(SameClassBatchSampler):
                 video subset.
         """
         super().__init__(dir_tree, 1, sequential, labeled)
-
-
-class SameClassMultiViewBatchSampler(VideoBatchSampler):
-    """A same-class batch sampler that samples multiple videos
-    of the same content but filmed from different views.
-    """
-    pass

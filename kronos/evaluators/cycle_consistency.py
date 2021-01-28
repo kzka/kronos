@@ -120,7 +120,7 @@ class CycleConsistency(Evaluator):
         res["scalar"] = np.mean(ccs)
         return res
 
-    def _evaluate(self, embs, labels, frames, fit=False):
+    def _evaluate(self, embs, labels, frames, fit=False, recons=None):
         if self.mode == "two_way":
             return self._evaluate_two_way(embs)
         elif self.mode == "three_way":
