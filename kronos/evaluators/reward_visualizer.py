@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import pdb
 
 from kronos.evaluators.base import Evaluator
 
@@ -9,24 +8,17 @@ from kronos.evaluators.base import Evaluator
 class RewardVisualizer(Evaluator):
     """Distance to goal state visualizer."""
 
-    def __init__(self, distance, l2_normalize, num_plots=2):
+    def __init__(self, l2_normalize, num_plots):
         """Constructor.
 
         Args:
-            distance (str): The distance metric to use when
-                calculating nearest-neighbours.
             l2_normalize (bool): Whether to l2 normalize embeddings before
                 computing distances.
+            num_plots (int):
 
         Raises:
             ValueError: If the distance metric is invalid.
         """
-        if distance not in ["sqeuclidean", "cosine"]:
-            raise ValueError(
-                "{} is not a supported distance metric.".format(distance)
-            )
-
-        self.distance = distance
         self.l2_normalize = l2_normalize
         self.num_plots = num_plots
 

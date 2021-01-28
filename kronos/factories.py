@@ -263,8 +263,9 @@ class EvaluatorFactory(Factory):
                 kwargs["num_frames"] = 2
                 kwargs["num_ctx_frames"] = config.SAMPLING.NUM_CONTEXT_FRAMES
             elif eval_name == 'reward_visualizer':
-                kwargs['l2_normalize'] = (
-                    config.EVAL.REWARD_VISUALIZER.L2_NORMALIZE)
+                kwargs.pop("distance")
+                kwargs['l2_normalize'] = config.LOSS.L2_NORMALIZE_EMBEDDINGS
+                kwargs['num_plots'] = 2
 
             evaluators[eval_name] = cls.create(eval_name, **kwargs)
 

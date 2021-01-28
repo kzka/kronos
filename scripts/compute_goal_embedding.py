@@ -60,11 +60,14 @@ def pickle_dump(filename, arr):
         pickle.dump(arr, fp)
 
 
-def main(experiment_name, l2_normalize):
+def main(experiment_name):
     device = torch.device('cuda')
     log_dir = os.path.join(CONFIG.DIRS.LOG_DIR, experiment_name)
     embedder, loaders = setup_embedder(log_dir, None)
     embedder.to(device).eval()
+    l2_normalize = config.LOSS.L2_NORMALIZE_EMBEDDINGS
+    if l2_normalize:
+        print('L2 normalizing embeddings.')
     start_emb, goal_emb = embed(embedder, loaders, l2_normalize, device)
     pickle_dump(os.path.join(log_dir, 'start_emb.pkl'), start_emb)
     pickle_dump(os.path.join(log_dir, 'goal_emb.pkl'), goal_emb)
@@ -73,6 +76,5 @@ def main(experiment_name, l2_normalize):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--experiment_name", type=str, required=True)
-    parser.add_argument("--l2_normalize", action='store_true')
     args = parser.parse_args()
-    main(args.experiment_name, args.l2_normalize)
+    main(args.experiment_name)

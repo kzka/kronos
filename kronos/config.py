@@ -34,11 +34,11 @@ _C.FP16_OPT = 0
 _C.TRAINING_ALGO = "contrastive"
 
 _C.BATCH_SIZE = 4
-_C.TRAIN_MAX_ITERS = 5_000
+_C.TRAIN_MAX_ITERS = 10_000
 
 # "pngdir"
 # all_but_gripper
-_C.DATASET = "/home/kevin/Desktop/pngdir"
+_C.DATASET = "/home/kevin/Desktop/all_but_gripper"
 
 # which action classes to select for creating
 # the dataset.
@@ -47,7 +47,7 @@ _C.ACTION_CLASS = []
 
 # Restrict the number of videos per class. This is useful for experiments that
 # test sample complexity based on the number of pretraining demonstrations.
-_C.MAX_VIDS_PER_CLASS = 1000
+_C.MAX_VIDS_PER_CLASS = 100
 
 # ============================================== #
 # Frame sampling params
@@ -147,7 +147,7 @@ _C.EVAL.KENDALLS_TAU.STRIDE = 1
 
 # Reward visualizer
 _C.EVAL.REWARD_VISUALIZER = CN()
-_C.EVAL.REWARD_VISUALIZER.L2_NORMALIZE = False
+_C.EVAL.REWARD_VISUALIZER.NUM_PLOTS = 2
 
 # Cycle consistency
 _C.EVAL.CYCLE_CONSISTENCY = CN()
@@ -242,7 +242,7 @@ _C.LOSS.CYCLE_LENGTH = 2
 _C.LOSS.LABEL_SMOOTHING = 0.1
 _C.LOSS.SOFTMAX_TEMPERATURE = 0.1
 _C.LOSS.NORMALIZE_INDICES = True
-_C.LOSS.L2_NORMALIZE_EMBEDDINGS = False
+_C.LOSS.L2_NORMALIZE_EMBEDDINGS = True
 _C.LOSS.VARIANCE_LAMBDA = 0.001
 _C.LOSS.HUBER_DELTA = 0.1
 _C.LOSS.SIMILARITY_TYPE = "l2"  # cosine

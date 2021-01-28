@@ -34,6 +34,9 @@ class ContrastiveTrainer(Trainer):
     def compute_loss(self, embs, steps, seq_lens, phase_labels=None):
         batch_size, num_cc_frames, num_dims = embs.shape
 
+        if self.normalize_embeddings:
+            embs = embs / (embs.norm(dim=-1, keepdim=True) + 1e-7)
+
         # Compute pairwise L2 distances between embeddings.
         embs_flat = embs.view(-1, num_dims)
         distances = torch.cdist(embs_flat, embs_flat)
@@ -44,4 +47,5 @@ class ContrastiveTrainer(Trainer):
         mask = labels.flatten()[:, None] == labels.flatten()[None, :]
         distances = distances * (~mask).float()
 
-        return distances.mean()
+        # Note the sum over the last dim then the mean.
+        return distances.sum(dim=-1).mean()
