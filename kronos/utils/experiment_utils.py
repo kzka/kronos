@@ -258,7 +258,7 @@ def get_factories(config, device, debug=None):
     dloaders = get_dataloaders(config, debug)
     model = factories.ModelFactory.from_config(config)
     # optimizer = factories.OptimizerFactory.from_config(config, model)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-5, weight_decay=1e-5)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-5, weight_decay=1e-3)
     trainer = factories.TrainerFactory.from_config(
         config, model, optimizer, device
     )

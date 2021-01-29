@@ -53,7 +53,9 @@ class ContrastiveTrainer(Trainer):
 
         # Compute positive and negative loss terms.
         pos_loss = (distances * mask.float()).sum(dim=-1).mean()
-        margin_diff = (1 - distances) * (~mask).float()
-        hinge_loss = torch.clamp(margin_diff, min=0).pow(2).sum(1).mean()
+        # margin_diff = (1 - distances) * (~mask).float()
+        # hinge_loss = torch.clamp(margin_diff, min=0).pow(2).sum(1).mean()
 
-        return pos_loss + hinge_loss
+        # return pos_loss + hinge_loss
+
+        return pos_loss

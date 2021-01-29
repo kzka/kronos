@@ -95,10 +95,18 @@ class SiameseAENet(ResNet):
         self.fc = nn.Linear(self.fc.in_features, 64)
 
         # Upsampling path.
-        self.up1 = Up(1024, 512 // 2)
-        self.up2 = Up(512, 256 // 2)
-        self.up3 = Up(256, 128 // 2)
-        self.up4 = Up(128, 64)
+        # self.up1 = Up(1024, 512 // 2)
+        # self.up2 = Up(512, 256 // 2)
+        # self.up3 = Up(256, 128 // 2)
+        # self.up4 = Up(128, 64)
+        self.up_convs = nn.ModuleList([
+            conv2d(512, 256),
+            conv2d(256, 128),
+            conv2d(128, 64),
+        ])
+        # self.up1 = conv2d(512, 256)
+        # self.up2 = conv2d(256, 128)
+        # self.up3 = conv2d(128, 64)
         self.out_conv = nn.Conv2d(64, 3, kernel_size=1)
 
         self.num_ctx_frames = 1
@@ -121,12 +129,13 @@ class SiameseAENet(ResNet):
         # Compute embeddings.
         feats = self.avgpool(x4)  # B, 512, 1, 1
         flat_feats = torch.flatten(feats, 1)
-        embs = self.fc(flat_feats)
+        # embs = self.fc(flat_feats)
         embs = embs.view((batch_size, t, -1))
 
         return embs, [x1, x2, x3, x4, feats]
 
-    def decode(self, feature_maps):
+    def decode_all_res(self, feature_maps):
+        """Decode using all spatial resolutions, a la u-net."""
         x1, x2, x3, x4, feats = feature_maps
         x = self.up1(feats, x4)
         x = self.up2(x, x3)
@@ -135,11 +144,24 @@ class SiameseAENet(ResNet):
         recon = self.out_conv(x)
         return recon
 
+    def decode_lowest_res(self, feature_maps):
+        _, _, _, x, _ = feature_maps
+        for up_conv in self.up_convs:
+            x = F.relu(up_conv(x))
+            x = F.interpolate(
+                x,
+                scale_factor=2,
+                mode='bilinear',
+                recompute_scale_factor=False,
+                align_corners=True)
+        x = self.out_conv(x)
+        return x
+
     def forward(self, x, reconstruct=True):
         embs, feature_maps = self.encode(x)
         ret = {"embs": embs}
         if reconstruct:
-            ret['reconstruction'] = self.decode(feature_maps)
+            ret['reconstruction'] = self.decode_lowest_res(feature_maps)
         return ret
 
 

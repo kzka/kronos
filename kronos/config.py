@@ -37,7 +37,7 @@ _C.TRAINING_ALGO = "tcc"
 _C.NETWORK_ARCH = "resnet18"
 
 _C.BATCH_SIZE = 4
-_C.TRAIN_MAX_ITERS = 2_500
+_C.TRAIN_MAX_ITERS = 10_000
 
 # "pngdir"
 # all_but_gripper
@@ -50,7 +50,7 @@ _C.ACTION_CLASS = []
 
 # Restrict the number of videos per class. This is useful for experiments that
 # test sample complexity based on the number of pretraining demonstrations.
-_C.MAX_VIDS_PER_CLASS = 10
+_C.MAX_VIDS_PER_CLASS = 100
 
 # ============================================== #
 # Frame sampling params
@@ -292,7 +292,7 @@ _C.LOGGING = CN()
 _C.LOGGING.REPORT_INTERVAL = 100
 
 # number of steps between eval logging
-_C.LOGGING.EVAL_INTERVAL = 2_000
+_C.LOGGING.EVAL_INTERVAL = 500
 
 # ============================================== #
 # Checkpointing params
