@@ -1,8 +1,7 @@
 """Pre-compute the goal embedding using a trained model.
 
 $ python scripts/compute_goal_embedding.py \
-    --experiment_name all_but_gripper \
-    --l2_normalize
+    --experiment_name all_but_gripper
 """
 
 import argparse
@@ -50,8 +49,9 @@ def setup_embedder(log_dir, config_path):
     checkpoint_manager = checkpoint.CheckpointManager(
         checkpoint.Checkpoint(embedder), checkpoint_dir, device)
     global_step = checkpoint_manager.restore_or_initialize()
+    l2_normalize = config.LOSS.L2_NORMALIZE_EMBEDDINGS
     print(f"Restored model from checkpoint {global_step}")
-    return embedder, loaders
+    return embedder, loaders, l2_normalize
 
 
 def pickle_dump(filename, arr):
@@ -63,9 +63,8 @@ def pickle_dump(filename, arr):
 def main(experiment_name):
     device = torch.device('cuda')
     log_dir = os.path.join(CONFIG.DIRS.LOG_DIR, experiment_name)
-    embedder, loaders = setup_embedder(log_dir, None)
+    embedder, loaders, l2_normalize = setup_embedder(log_dir, None)
     embedder.to(device).eval()
-    l2_normalize = config.LOSS.L2_NORMALIZE_EMBEDDINGS
     if l2_normalize:
         print('L2 normalizing embeddings.')
     start_emb, goal_emb = embed(embedder, loaders, l2_normalize, device)

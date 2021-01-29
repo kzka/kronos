@@ -276,24 +276,22 @@ class ModelFactory(Factory):
     """Factory to create models."""
 
     PRODUCTS = {
-        "tcc": models.TCCNet,
-        "stcc": models.TCCNet,
-        "sal": models.SALNet,
-        "svtcn": models.TCNNet,
-        "mvtcn": models.TCNNet,
+        "resnet18": models.Net,
+        "renet18_3d": models.TCCNet,
+        "resnet18_ae": models.SiameseAENet,
     }
 
     @classmethod
     def from_config(cls, config):
         kwargs = {}
-        kwargs["num_ctx_frames"] = config.SAMPLING.NUM_CONTEXT_FRAMES
-        kwargs["model_config"] = config.MODEL
-        return cls.create(config.TRAINING_ALGO, **kwargs)
+        if config.NETWORK_ARCH == 'resnet18_3d':
+            kwargs["num_ctx_frames"] = config.SAMPLING.NUM_CONTEXT_FRAMES
+            kwargs["model_config"] = config.MODEL
+        return cls.create(config.NETWORK_ARCH, **kwargs)
 
 
 class OptimizerFactory(Factory):
-    """Factory to create optimizers.
-    """
+    """Factory to create optimizers."""
 
     PRODUCTS = {
         "adam": torch.optim.Adam,

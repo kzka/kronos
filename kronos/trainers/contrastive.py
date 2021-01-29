@@ -17,7 +17,7 @@ class ContrastiveTrainer(Trainer):
 
     def compute_aux_loss(self, frames, reconstruction, steps, seq_lens):
         if self.aux_loss == 'none':
-            return None
+            return 0.0
         elif self.aux_loss == 'autoencoding':
             _, _, sh, sw = reconstruction.shape
             _, _, c, h, w = frames.shape
@@ -37,15 +37,23 @@ class ContrastiveTrainer(Trainer):
         if self.normalize_embeddings:
             embs = embs / (embs.norm(dim=-1, keepdim=True) + 1e-7)
 
-        # Compute pairwise L2 distances between embeddings.
+        # Compute pairwise squared L2 distances between embeddings.
         embs_flat = embs.view(-1, num_dims)
         distances = torch.cdist(embs_flat, embs_flat)
 
-        # Zero out distances that belong to the same sequence.
-        labels = torch.arange(batch_size).unsqueeze(1).repeat(1, num_cc_frames)
+        # Each row in a batch corresponds to a frame sequence. Since this
+        # baseline assumes rough alignment between sequences, we want columns,
+        # i.e. frames in each row that belong to the same index to be close
+        # together in embedding space. Additionally, they should be apart from
+        # every other frame in the entire batch.
+        # This computes the mask accordingly.
+        labels = torch.arange(num_cc_frames).unsqueeze(0).repeat(batch_size, 1)
         labels = labels.to(embs.device)
         mask = labels.flatten()[:, None] == labels.flatten()[None, :]
-        distances = distances * (~mask).float()
 
-        # Note the sum over the last dim then the mean.
-        return distances.sum(dim=-1).mean()
+        # Compute positive and negative loss terms.
+        pos_loss = (distances * mask.float()).sum(dim=-1).mean()
+        margin_diff = (1 - distances) * (~mask).float()
+        hinge_loss = torch.clamp(margin_diff, min=0).pow(2).sum(1).mean()
+
+        return pos_loss + hinge_loss

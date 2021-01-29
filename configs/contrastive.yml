@@ -1,0 +1,14 @@
+# Baseline implementation from https://openreview.net/pdf?id=Hyq4yhile
+
+TRAINING_ALGO: contrastive
+SAMPLING:
+  STRATEGY: variable_stride
+LOSS:
+  AUX_LOSS:
+    TYPE: autoencoding
+EVAL:
+  DOWNSTREAM_TASK_EVALUATORS:
+    - reward_visualizer
+    - reconstruction_visualizer
+    - kendalls_tau
+NETWORK_ARCH: resnet18_ae

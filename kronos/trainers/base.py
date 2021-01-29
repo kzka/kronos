@@ -52,6 +52,9 @@ class Trainer(abc.ABC):
                 model, optimizer, opt_level=f"O{self._opt_lvl}"
             )
 
+        self.base_loss_tensor = torch.FloatTensor([0]).to(self._device)
+        self.aux_loss_tensor = torch.FloatTensor([0]).to(self._device)
+
     @abc.abstractmethod
     def compute_loss(self, embs, steps, seq_lens, phase_labels=None):
         """Compute the loss on a single batch.
@@ -89,7 +92,7 @@ class Trainer(abc.ABC):
 
         :meta public:
         """
-        return None
+        return 0.
 
     def train_one_iter(self, batch, global_step):
         """Single forward + backward pass of the model.
@@ -117,22 +120,28 @@ class Trainer(abc.ABC):
 
         # compute loss
         loss = self.compute_loss(embs, steps, seq_lens, phase_labels)
-        aux_loss = self.compute_aux_loss(
-            frames, out['reconstruction'], steps, seq_lens)
-        if aux_loss is not None:
-            loss = loss + aux_loss
+        if 'reconstruction' in out:
+            aux_loss = self.compute_aux_loss(
+                frames, out['reconstruction'], steps, seq_lens)
+        else:
+            aux_loss = 0.
+        total_loss = loss + aux_loss
+
+        # store losses
+        self.base_loss_tensor = loss
+        self.aux_loss_tensor = aux_loss
 
         # scale loss for mixed precision
         if self._opt_lvl > 0 and IS_APEX:
-            with amp.scale_loss(loss, self._optimizer) as scaled_loss:
+            with amp.scale_loss(total_loss, self._optimizer) as scaled_loss:
                 scaled_loss.backward()
         else:
-            loss.backward()
+            total_loss.backward()
 
         # gradient step
         self._optimizer.step()
 
-        return loss
+        return total_loss
 
     @torch.no_grad()
     def eval_num_iters(self, valid_loader, eval_iters=None):

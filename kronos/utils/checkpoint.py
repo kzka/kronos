@@ -92,8 +92,7 @@ class Checkpoint:
 
 
 class CheckpointManager:
-    """A model and optimizer checkpoint manager.
-    """
+    """A model and optimizer checkpoint manager."""
 
     def __init__(self, checkpoint, directory, device, max_to_keep=10):
         """Constructor.
@@ -144,9 +143,7 @@ class CheckpointManager:
             global_step (int): The iteration number which will be used
                 to name the checkpoint.
         """
-        save_path = osp.join(
-            self.directory, "{:016d}.ckpt".format(global_step)
-        )
+        save_path = osp.join(self.directory, "{:016d}.ckpt".format(global_step))
         self.checkpoint.save(save_path)
         self.latest_checkpoint = save_path
         self._trim_checkpoints()

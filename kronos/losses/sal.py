@@ -10,8 +10,8 @@ from kronos.losses import core
 def get_triplet_indices(
     batch_size, num_steps, num_samples, shuffle_fraction,
 ):
-    """Generate positive and negative frame triplets.
-    """
+    """Generate positive and negative frame triplets."""
+
     total_num_samples = batch_size * num_samples
 
     # SAL paper terminology:

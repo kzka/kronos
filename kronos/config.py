@@ -31,10 +31,13 @@ _C.SEED = 1
 _C.FP16_OPT = 0
 
 # can be one of: ['tcc', 'sal', 'contrastive']
-_C.TRAINING_ALGO = "contrastive"
+_C.TRAINING_ALGO = "tcc"
+
+# can be one of: ['resnet18', 'resnet18_3d', 'resnet18_ae']
+_C.NETWORK_ARCH = "resnet18"
 
 _C.BATCH_SIZE = 4
-_C.TRAIN_MAX_ITERS = 10_000
+_C.TRAIN_MAX_ITERS = 2_500
 
 # "pngdir"
 # all_but_gripper
@@ -47,7 +50,7 @@ _C.ACTION_CLASS = []
 
 # Restrict the number of videos per class. This is useful for experiments that
 # test sample complexity based on the number of pretraining demonstrations.
-_C.MAX_VIDS_PER_CLASS = 100
+_C.MAX_VIDS_PER_CLASS = 10
 
 # ============================================== #
 # Frame sampling params
@@ -68,7 +71,7 @@ _C.SAMPLING.IMAGE_EXT = "*.png"
 
 # can be one of:
 # 'all', 'stride', 'offset_uniform', 'variable_stride'
-_C.SAMPLING.STRATEGY = "variable_stride" # "offset_uniform"
+_C.SAMPLING.STRATEGY = "offset_uniform"
 
 _C.SAMPLING.CONTEXT_STRIDE = 3
 _C.SAMPLING.STRIDE_ALL_SAMPLER = 1
@@ -129,11 +132,11 @@ _C.EVAL.VAL_ITERS = 10
 _C.EVAL.DOWNSTREAM_TASK_EVALUATORS = [
     # "linear_probe",
     "reward_visualizer",
-    # "kendalls_tau",
+    "kendalls_tau",
     # 'phase_alignment_topk',
     # 'cycle_consistency',
     # "nn_visualizer",
-    "reconstruction_visualizer",
+    # "reconstruction_visualizer",
 ]
 
 # what distance metric to use in the

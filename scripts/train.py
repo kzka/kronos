@@ -65,10 +65,6 @@ def main(args):
                 # Train one iteration.
                 loss = trainer.train_one_iter(batch, global_step)
 
-                # Save model checkpoint.
-                if not global_step % config.CHECKPOINT.SAVE_INTERVAL:
-                    checkpoint_manager.save(global_step)
-
                 if not global_step % config.LOGGING.REPORT_INTERVAL:
                     train_eval_loss = trainer.eval_num_iters(
                         loaders["pretrain_train"], 20)
@@ -78,6 +74,8 @@ def main(args):
                         "train": loss,
                         "valid": valid_loss,
                         "train_eval": train_eval_loss,
+                        "vanilla_loss": trainer.base_loss_tensor,
+                        "aux_loss": trainer.aux_loss_tensor,
                     }
                     logger.log_loss(losses, global_step)
 
@@ -104,6 +102,10 @@ def main(args):
                             "valid": eval_metric_valid,
                         }
                         logger.log_metric(metrics, global_step, eval_name)
+
+                # Save model checkpoint.
+                if not global_step % config.CHECKPOINT.SAVE_INTERVAL:
+                    checkpoint_manager.save(global_step)
 
                 # Exit if complete.
                 global_step += 1

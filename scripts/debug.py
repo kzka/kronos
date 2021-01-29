@@ -43,6 +43,13 @@ def main(args):
             frames = batch["frames"]
             b, _, c, h, w = frames.shape
             frames = frames.view(b, num_frames, num_ctx_frames, c, h, w)
+
+            # # To visualize baseline batch.
+            # for i in range(frames.shape[1]):
+            #     grid_img = torchvision.utils.make_grid(frames[:, i, -1], nrow=5)
+            #     plt.imshow(grid_img.permute(1, 2, 0))
+            #     plt.show()
+
             for b in range(frames.shape[0]):
                 print(f"\tBatch Item {b}")
                 if args.viz_context:
@@ -59,8 +66,7 @@ def main(args):
                     plt.show()
                 else:
                     grid_img = torchvision.utils.make_grid(
-                        frames[b, :, -1], nrow=5
-                    )
+                        frames[b, :, -1], nrow=5)
                     # grid_img = UnNormalize()(grid_img)
                     plt.imshow(grid_img.permute(1, 2, 0))
                     plt.show()
